@@ -1,0 +1,16 @@
+node_modules/
+.npm-cache/
+.next/
+.env
+.env.*
+!.env.example
+out/
+build/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+tmp/

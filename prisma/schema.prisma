@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+enum MonitorStatus {
+  UNKNOWN
+  UP
+  DOWN
+}
+enum HttpMethod {
+  GET
+  POST
+  HEAD
+}
+model User {
+  id String @id @default(cuid())
+  name String @db.VarChar(80)
+  email String @unique @db.VarChar(254)
+  passwordHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  monitors Monitor[]
+}
+model Monitor {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String @db.VarChar(100)
+  url String @db.VarChar(2048)
+  method HttpMethod @default(GET)
+  expectedStatus Int @default(200)
+  timeoutMs Int @default(10000)
+  intervalMinutes Int @default(5)
+  isActive Boolean @default(true)
+  currentStatus MonitorStatus @default(UNKNOWN)
+  lastCheckedAt DateTime?
+  lastResponseTime Int?
+  leaseToken String?
+  leaseUntil DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  checks MonitorCheck[]
+  incidents Incident[]
+  @@index([userId, createdAt])
+  @@index([isActive, lastCheckedAt])
+}
+model MonitorCheck {
+  id String @id @default(cuid())
+  monitorId String
+  monitor Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  status MonitorStatus
+  statusCode Int?
+  responseTimeMs Int?
+  errorMessage String? @db.VarChar(500)
+  checkedAt DateTime @default(now())
+  @@index([monitorId, checkedAt])
+  @@index([checkedAt])
+}
+model Incident {
+  id String @id @default(cuid())
+  monitorId String
+  monitor Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  startedAt DateTime @default(now())
+  resolvedAt DateTime?
+  cause String @db.VarChar(500)
+  createdAt DateTime @default(now())
+  @@index([monitorId, startedAt])
+  @@index([monitorId, resolvedAt])
+}
