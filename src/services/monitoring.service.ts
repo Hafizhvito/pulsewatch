@@ -47,9 +47,16 @@ export async function persistResult(
   });
 }
 export async function runCycle() {
-  const due = await db.$queryRaw<
-    { id: string }[]
-  >`SELECT id FROM Monitor WHERE isActive = true AND (lastCheckedAt IS NULL OR TIMESTAMPADD(MINUTE, intervalMinutes, lastCheckedAt) <= UTC_TIMESTAMP(3)) AND (leaseUntil IS NULL OR leaseUntil < UTC_TIMESTAMP(3)) ORDER BY lastCheckedAt ASC LIMIT 50`;
+  const now = new Date();
+  const candidates = await db.monitor.findMany({
+    where: {
+      isActive: true,
+      OR: [{ leaseUntil: null }, { leaseUntil: { lt: now } }],
+    },
+    orderBy: { lastCheckedAt: "asc" },
+    take: 250,
+  });
+  const due = candidates.filter((monitor) => isDue(monitor, now)).slice(0, 50);
   for (let offset = 0; offset < due.length; offset += 5) {
     await Promise.all(
       due.slice(offset, offset + 5).map(async ({ id }) => {

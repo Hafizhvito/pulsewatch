@@ -2,8 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider = "postgresql"
+  url = env("NETLIFY_DB_URL")
 }
 enum MonitorStatus {
   UNKNOWN

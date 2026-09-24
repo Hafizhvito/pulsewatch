@@ -19,6 +19,8 @@
     "format": "node node_modules/prettier/bin/prettier.cjs --write src scripts tests prisma/seed.ts *.json *.ts *.mjs README.md"
   },
   "dependencies": {
+    "@netlify/database": "^2.0.1",
+    "@netlify/functions": "^6.0.0",
     "@prisma/client": "^6.19.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.0",

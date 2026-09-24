@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["node_modules/.prisma/client/**"]
+
+[functions."run-monitoring"]
+  schedule = "* * * * *"
