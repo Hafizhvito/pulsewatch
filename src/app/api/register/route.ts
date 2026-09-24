@@ -4,7 +4,10 @@ import { db } from "@/lib/db";
 import { registerSchema } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
 export async function POST(request: Request) {
-  if (request.headers.get("origin") !== new URL(request.url).origin)
+  const configuredOrigin = process.env.NEXTAUTH_URL
+    ? new URL(process.env.NEXTAUTH_URL).origin
+    : new URL(request.url).origin;
+  if (request.headers.get("origin") !== configuredOrigin)
     return Response.json({ error: "Invalid request origin." }, { status: 403 });
   if (!rateLimit("register", 30, 60000))
     return Response.json(
