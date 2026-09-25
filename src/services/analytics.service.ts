@@ -56,5 +56,5 @@ export async function responseHistory(userId: string, monitorId?: string) {
   // Aggregate hourly in PostgreSQL; never transfer unbounded raw history to the UI.
   return db.$queryRaw<
     { time: string; response: number | null; checks: bigint }[]
-  >`SELECT TO_CHAR(DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:00:00"Z"') AS time, AVG(c."responseTimeMs")::double precision AS response, COUNT(*) AS checks FROM "MonitorCheck" c JOIN "Monitor" m ON c."monitorId" = m.id WHERE m."userId" = ${userId} AND (${monitorId ?? null} IS NULL OR m.id = ${monitorId ?? null}) AND c."checkedAt" >= NOW() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ORDER BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ASC`;
+  >`SELECT TO_CHAR(DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:00:00"Z"') AS time, AVG(c."responseTimeMs")::double precision AS response, COUNT(*) AS checks FROM "MonitorCheck" c JOIN "Monitor" m ON c."monitorId" = m.id WHERE m."userId" = ${userId} AND (CAST(${monitorId ?? null} AS text) IS NULL OR m.id = ${monitorId ?? null}) AND c."checkedAt" >= NOW() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ORDER BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ASC`;
 }
