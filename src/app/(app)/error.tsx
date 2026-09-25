@@ -4,8 +4,7 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
     <section className="panel empty">
       <h1>We couldn’t load your workspace.</h1>
       <p>
-        Check that MySQL is running and your database is configured, then try
-        again.
+        We couldn’t retrieve your workspace data. Please try again in a moment.
       </p>
       <button className="button primary" onClick={reset}>
         Try again

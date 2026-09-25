@@ -53,8 +53,8 @@ export async function monitorAnalytics(
   return result;
 }
 export async function responseHistory(userId: string, monitorId?: string) {
-  // Aggregate hourly in MySQL; never transfer unbounded raw history to the UI.
+  // Aggregate hourly in PostgreSQL; never transfer unbounded raw history to the UI.
   return db.$queryRaw<
     { time: string; response: number | null; checks: bigint }[]
-  >`SELECT DATE_FORMAT(c.checkedAt, '%Y-%m-%dT%H:00:00Z') AS time, AVG(c.responseTimeMs) AS response, COUNT(*) AS checks FROM MonitorCheck c JOIN Monitor m ON c.monitorId=m.id WHERE m.userId=${userId} AND (${monitorId ?? null} IS NULL OR m.id=${monitorId ?? null}) AND c.checkedAt >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 24 HOUR) GROUP BY time ORDER BY time ASC`;
+  >`SELECT TO_CHAR(DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:00:00"Z"') AS time, AVG(c."responseTimeMs")::double precision AS response, COUNT(*) AS checks FROM "MonitorCheck" c JOIN "Monitor" m ON c."monitorId" = m.id WHERE m."userId" = ${userId} AND (${monitorId ?? null} IS NULL OR m.id = ${monitorId ?? null}) AND c."checkedAt" >= NOW() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ORDER BY DATE_TRUNC('hour', c."checkedAt" AT TIME ZONE 'UTC') ASC`;
 }

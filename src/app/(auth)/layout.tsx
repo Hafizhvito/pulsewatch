@@ -36,7 +36,7 @@ export default function AuthLayout({
             </div>
             <div>
               <ShieldCheck size={20} />
-              <span>Self-hosted with MySQL storage</span>
+              <span>Managed PostgreSQL storage</span>
             </div>
           </div>
         </div>
